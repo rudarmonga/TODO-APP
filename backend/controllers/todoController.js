@@ -2,7 +2,7 @@ const Todo = require('../models/Todo');
 
 exports.getTodos = async (req, res) => {
     try {
-        const todos = await Todo.find();
+        const todos = await Todo.find({ user: req.user._id });
         res.json(todos);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -12,7 +12,7 @@ exports.getTodos = async (req, res) => {
 exports.createTodo = async (req, res) => {
     try {
         const { title } = req.body;
-        const newTodo = new Todo({ title});
+        const newTodo = new Todo({ title, user: req.user._id });
         await newTodo.save();
         res.status(201).json(newTodo);
     } catch (error) {
@@ -23,11 +23,15 @@ exports.createTodo = async (req, res) => {
 exports.updateTodo = async (req, res) => {
     try {
         const { id } = req.params;
-        const updatedTodo = await Todo.findByIdAndUpdate(id, req.body, { new: true });
-        if (!updatedTodo) {
+        const todo = await Todo.findOneAndUpdate(
+            { _id: id, user: req.user._id },
+            req.body,
+            { new: true }
+        );
+        if (!todo) {
             return res.status(404).json({ message: 'Todo not found' });
         }
-        res.json(updatedTodo);
+        res.json(todo);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -36,8 +40,8 @@ exports.updateTodo = async (req, res) => {
 exports.deleteTodo = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedTodo = await Todo.findByIdAndDelete(id);
-        if (!deletedTodo) {
+        const todo = await Todo.findOneAndDelete({ _id: id, user: req.user._id });
+        if (!todo) {
             return res.status(404).json({ message: 'Todo not found' });
         }
         res.json({ message: 'Todo deleted successfully' });
