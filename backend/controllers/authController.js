@@ -10,10 +10,6 @@ const generateToken = (userId) => {
 exports.register = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
     
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return next(new AppError('User with this email already exists', 400));
-    }
   
     const user = new User({ email, password });
     await user.save();

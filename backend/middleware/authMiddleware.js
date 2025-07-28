@@ -14,7 +14,7 @@ const authMiddleware = async (req, res, next) => {
             if (!req.user) throw new Error('User not found');
             next();
         } catch (error) {
-            res.status(401).json({ message: 'Not authorized, token failed' });
+            next(error);
         }
     } else {
         return res.status(401).json({ message: 'Not authorized, no token' });
