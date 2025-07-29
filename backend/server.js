@@ -42,13 +42,45 @@ const app = express();
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
-  debug: true,
-  tracesSampleRate: 1.0,
+  debug: process.env.NODE_ENV === 'development',
+  environment: process.env.NODE_ENV || 'development',
+  release: process.env.APP_VERSION || '1.0.0',
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
   integrations: [
     new Sentry.Integrations.Http({ tracing: true }),
     new Tracing.Integrations.Express({ app }),
+    new Tracing.Integrations.Mongo({ useMongoose: true }),
   ],
+  beforeSend(event, hint) {
+    if (process.env.NODE_ENV === 'development' && !process.env.SENTRY_DEBUG) {
+      return null;
+    }
+
+    if (event.exception) {
+      const exception = event.exception.values[0];
+      if (exception.type === 'ValidationError' && exception.value.includes('password')) {
+        return null;
+      }
+    }
+
+    event.tags = {
+      ...event.tags,
+      service: 'todo-backend',
+      region: process.env.REGION || 'local',
+    };
+    
+    return event;
+  },
+
+  beforeSendTransaction(event) {
+    if (event.op === 'http.server') {
+      return event;
+    }
+    return event;
+  },
 });
+
 
 // ---------------------
 // LOG FOLDER SETUP
