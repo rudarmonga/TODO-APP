@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { AppError } = require('../utils/errorHandler');
 const { catchAsync } = require('../middleware/errorMiddleware');
 const Sentry = require('@sentry/node');
+const { sentryMetrics } = require('../config/sentryAlerts');
 
 const generateToken = (userId) => {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -20,6 +21,7 @@ exports.register = catchAsync(async (req, res, next) => {
 
     const existingUser = await User.findOne({ email });
   if (existingUser) {
+    sentryMetrics.incrementDuplicateEmail();
     Sentry.captureException(new Error('User registration failed - email already exists'), {
       tags: {
         action: 'register',
@@ -82,6 +84,7 @@ exports.register = catchAsync(async (req, res, next) => {
   
     const user = await User.findOne({ email }).select('+password');
     if (!user || !(await user.matchPassword(password))) {
+      sentryMetrics.incrementAuthFailure();
       Sentry.captureException(new Error('Login failed - invalid credentials'), {
         tags: {
           action: 'login',
