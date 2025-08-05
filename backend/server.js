@@ -35,6 +35,9 @@ const { performanceMiddleware, memoryMonitoringMiddleware } = require('./middlew
 const { sentryMetrics } = require('./config/sentryAlerts');
 const SentryDashboard = require('./config/sentryDashboard');
 const SentryNotifications = require('./utils/sentryNotifications');
+const { businessMetricsMiddleware, userEngagementMiddleware } = require('./middleware/businessMetricsMiddleware');
+const CustomMetrics = require('./utils/customMeteics');
+const WebhookConfig = require('./config/webhookConfig');
 
 // ---------------------
 // SENTRY INITIALIZATION
@@ -91,6 +94,8 @@ Sentry.init({
 const dashboard = new SentryDashboard();
 const notifications = new SentryNotifications();
 
+const customMetrics = new CustomMetrics();
+const webhookConfig = new WebhookConfig();
 console.log('📊 Sentry Dashboard Configuration:');
 console.log(dashboard.getDashboardConfig());
 
@@ -149,6 +154,8 @@ app.use((req, res, next) => {
   });
   next();
 });
+app.use(businessMetricsMiddleware);
+app.use(userEngagementMiddleware);
 
 // ---------------------
 // ROUTES
@@ -168,6 +175,15 @@ app.get('/health', (req, res) => {
     message: 'Server is healthy',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+  });
+});
+
+app.get('/metrics', (req, res) => {
+  res.json({
+    success: true,
+    metrics: customMetrics.getMetrics(),
+    webhooks: webhookConfig.validateWebhooks(),
+    timestamp: new Date().toISOString(),
   });
 });
 
