@@ -1,11 +1,17 @@
 const Sentry = require('@sentry/node');
+const EmailService = require('../config/emailService');
+const WebhookConfig = require('../config/webhookConfig');
 
 class SentryNotifications {
   constructor() {
+    this.emailService = new EmailService();
+    this.webhookConfig = new WebhookConfig();
     this.notificationChannels = {
-      email: process.env.SENTRY_EMAIL_NOTIFICATIONS === 'true',
-      slack: process.env.SENTRY_SLACK_WEBHOOK_URL,
-      teams: process.env.SENTRY_TEAMS_WEBHOOK_URL,
+      email: this.emailService.isConfigured,
+      slack: !!this.webhookConfig.webhooks.slack.enabled,
+      teams: !!this.webhookConfig.webhooks.teams.enabled,
+      discord: !!this.webhookConfig.webhooks.discord.enabled,
+      custom: this.webhookConfig.webhooks.custom.length > 0,
     };
   }
 
@@ -90,7 +96,11 @@ class SentryNotifications {
   }
 
   async sendEmailNotification(notification) {
-    console.log('Email notification:', notification);
+    if (this.notificationChannels.email) {
+      await this.emailService.sendAlertEmail(notification.alertType, notification.data);
+    } else {
+      console.log('�� Email notification (console):', notification);
+    }
   }
 
   async sendSlackNotification(notification) {
