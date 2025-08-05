@@ -33,6 +33,8 @@ const {
 const { errorHandler } = require('./middleware/errorMiddleware');
 const { performanceMiddleware, memoryMonitoringMiddleware } = require('./middleware/sentryPreformanceMiddleware');
 const { sentryMetrics } = require('./config/sentryAlerts');
+const SentryDashboard = require('./config/sentryDashboard');
+const SentryNotifications = require('./utils/sentryNotifications');
 
 // ---------------------
 // SENTRY INITIALIZATION
@@ -83,6 +85,34 @@ Sentry.init({
   },
 });
 
+// ---------------------------------------
+// INITIALIZE DASHBOARD AND NOTIFICATIONS
+// ---------------------------------------
+const dashboard = new SentryDashboard();
+const notifications = new SentryNotifications();
+
+console.log('📊 Sentry Dashboard Configuration:');
+console.log(dashboard.getDashboardConfig());
+
+// ---------------------
+// HEALTH CHECK ENDPOINT
+// ---------------------
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Server is healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    sentry: {
+      dashboard: dashboard.getDashboardConfig(),
+      notifications: {
+        email: !!process.env.SENTRY_EMAIL_NOTIFICATIONS,
+        slack: !!process.env.SENTRY_SLACK_WEBHOOK_URL,
+        teams: !!process.env.SENTRY_TEAMS_WEBHOOK_URL,
+      },
+    },
+  });
+});
 
 // ---------------------
 // LOG FOLDER SETUP
