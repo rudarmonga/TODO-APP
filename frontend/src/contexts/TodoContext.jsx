@@ -24,7 +24,7 @@ export const TodoProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get('/api/todos');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}api/todos`);
       setTodos(response.data.data);
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to fetch todos');
@@ -46,7 +46,7 @@ export const TodoProvider = ({ children }) => {
   const createTodo = async (title) => {
     try {
       setError(null);
-      const response = await axios.post('/api/todos', { title });
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}api/todos`, { title });
       setTodos(prev => [response.data.data, ...prev]);
       return { success: true };
     } catch (error) {
@@ -61,7 +61,7 @@ export const TodoProvider = ({ children }) => {
   const updateTodo = async (id, updates) => {
     try {
       setError(null);
-      const response = await axios.put(`/api/todos/${id}`, updates);
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}api/todos/${id}`, updates);
       setTodos(prev => prev.map(todo => 
         todo._id === id ? response.data.data : todo
       ));
@@ -78,7 +78,7 @@ export const TodoProvider = ({ children }) => {
   const deleteTodo = async (id) => {
     try {
       setError(null);
-      await axios.delete(`/api/todos/${id}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}api/todos/${id}`);
       setTodos(prev => prev.filter(todo => todo._id !== id));
       return { success: true };
     } catch (error) {

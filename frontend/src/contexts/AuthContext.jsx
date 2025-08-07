@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}api/auth/login`, { email, password });
       const { token, user } = response.data;
       
       localStorage.setItem('token', token);
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (email, password) => {
     try {
-      const response = await axios.post('/api/auth/register', { email, password });
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}api/auth/register`, { email, password });
       const { token, user } = response.data;
       
       localStorage.setItem('token', token);
