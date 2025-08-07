@@ -168,6 +168,7 @@ app.use('/api/todos', (req, res, next) => {
 });
 app.use('/api/todos', require('./routes/todoRoutes'));
 app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
+app.use('/api/profile', require('./routes/profileRoutes'));
 
 app.get('/health', (req, res) => {
   res.status(200).json({
