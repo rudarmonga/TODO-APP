@@ -5,7 +5,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "deploy:heroku": "node scripts/deploy-production.js heroku",
+    "deploy:railway": "node scripts/deploy-production.js railway",
+    "deploy:render": "node scripts/deploy-production.js render",
+    "deploy:digitalocean": "node scripts/deploy-production.js digitalocean",
+    "build-frontend": "node scripts/deploy-production.js build-frontend",
+    "deploy:instructions": "node scripts/deploy-production.js instructions"
   },
   "keywords": [],
   "author": "",

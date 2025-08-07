@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -5,7 +6,7 @@ const path = require('path');
 class DeploymentScript {
   constructor() {
     this.environment = process.env.NODE_ENV || 'development';
-    this.projectRoot = path.resolve(__dirname, '..');
+    this.projectRoot = path.resolve(__dirname, '../..');
   }
 
   // Run deployment

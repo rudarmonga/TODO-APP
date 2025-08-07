@@ -11,7 +11,7 @@ class EmailService {
     const config = this.getEmailConfig();
     
     if (config.host && config.port) {
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host: config.host,
         port: config.port,
         secure: config.secure, 
